@@ -24,13 +24,13 @@ type Client interface {
 
 // PR represents a GitHub pull request.
 type PR struct {
-	Number int    `json:"number"`
-	Title  string `json:"title"`
-	Body   string `json:"body"`
-	State  string `json:"state"`
-	Merged bool   `json:"merged"`
+	Number  int    `json:"number"`
+	Title   string `json:"title"`
+	Body    string `json:"body"`
+	State   string `json:"state"`
+	Merged  bool   `json:"merged"`
 	HTMLURL string `json:"html_url"`
-	Base   struct {
+	Base    struct {
 		Ref string `json:"ref"`
 	} `json:"base"`
 	Head struct {
@@ -77,9 +77,15 @@ func NewClient() (Client, string, string, error) {
 	return &httpClient{token: token}, "", "", nil
 }
 
-// NewClientForRepo creates a Client with the given owner/repo, auto-detecting auth.
-func NewClientForRepo(owner, repo string) (Client, error) {
-	token := os.Getenv("GITHUB_TOKEN")
+// NewClientForRepo creates a Client with the given owner/repo.
+// Token resolution order: cfgToken (from config file / STACKED_GITHUB_TOKEN),
+// then GITHUB_TOKEN / GH_TOKEN env vars, then go-gh auth.
+func NewClientForRepo(owner, repo, cfgToken string) (Client, error) {
+	token := cfgToken
+
+	if token == "" {
+		token = os.Getenv("GITHUB_TOKEN")
+	}
 	if token == "" {
 		token = os.Getenv("GH_TOKEN")
 	}
@@ -89,7 +95,7 @@ func NewClientForRepo(owner, repo string) (Client, error) {
 		opts := gogh.ClientOptions{}
 		rest, err := gogh.NewRESTClient(opts)
 		if err != nil {
-			return nil, fmt.Errorf("no GitHub token found; run `gh auth login` or set GITHUB_TOKEN")
+			return nil, fmt.Errorf("no GitHub token found; set github_token in config, GITHUB_TOKEN env, or run `gh auth login`")
 		}
 		return &goghClient{rest: rest, owner: owner, repo: repo}, nil
 	}

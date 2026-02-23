@@ -50,6 +50,7 @@ func loadConfig() error {
 	viper.SetEnvPrefix("STACKED")
 	viper.AutomaticEnv()
 	_ = viper.BindEnv("branch_template")
+	_ = viper.BindEnv("github_token")
 
 	return viper.Unmarshal(&cfg)
 }
