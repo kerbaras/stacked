@@ -44,7 +44,7 @@ func runNext(cmd *cobra.Command, args []string) error {
 	}
 
 	index := len(st.Branches) + 1
-	branchName := stack.BranchName(stackName, index, title)
+	branchName := stack.BranchName(cfg.BranchTemplate, stackName, index, title)
 
 	if err := repo.Checkout(branchName, true); err != nil {
 		return fmt.Errorf("create branch %s: %w", branchName, err)
