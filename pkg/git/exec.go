@@ -11,6 +11,11 @@ func (r *Repo) Rebase(parent, branch string) error {
 	return r.exec("rebase", "--empty=drop", parent, branch)
 }
 
+// RebaseSilent rebases without printing output.
+func (r *Repo) RebaseSilent(parent, branch string) error {
+	return r.execSilent("rebase", "--empty=drop", parent, branch)
+}
+
 // RebaseContinue continues a paused rebase.
 func (r *Repo) RebaseContinue() error {
 	return r.exec("rebase", "--continue")
@@ -26,14 +31,29 @@ func (r *Repo) Fetch(remote string) error {
 	return r.exec("fetch", remote)
 }
 
+// FetchSilent fetches from a remote without printing output.
+func (r *Repo) FetchSilent(remote string) error {
+	return r.execSilent("fetch", remote)
+}
+
 // Pull pulls the current branch with fast-forward only.
 func (r *Repo) Pull(remote, branch string) error {
 	return r.exec("pull", "--ff-only", remote, branch)
 }
 
+// PullSilent pulls without printing output.
+func (r *Repo) PullSilent(remote, branch string) error {
+	return r.execSilent("pull", "--ff-only", remote, branch)
+}
+
 // DeleteBranch force-deletes a local branch.
 func (r *Repo) DeleteBranch(name string) error {
 	return r.exec("branch", "-D", name)
+}
+
+// DeleteBranchSilent force-deletes a local branch without printing output.
+func (r *Repo) DeleteBranchSilent(name string) error {
+	return r.execSilent("branch", "-D", name)
 }
 
 // NeedsRebase reports whether parent has commits not in branch.

@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/kerbaras/stacked/pkg/git"
 	"github.com/kerbaras/stacked/pkg/stack"
+	"github.com/kerbaras/stacked/pkg/ui"
 )
 
 func openRepo() (*git.Repo, error) {
@@ -43,6 +43,6 @@ func syncHint(repo *git.Repo, st *stack.Stack) {
 		return
 	}
 	if local != remote {
-		fmt.Fprintf(os.Stderr, "hint: %s has new commits. Run `stacked sync` to update.\n", st.Base)
+		ui.Hintf("%s has new commits. Run %s to update.", ui.BranchName(st.Base), ui.Bold.Render("`stacked sync`"))
 	}
 }

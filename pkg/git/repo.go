@@ -100,12 +100,43 @@ func (r *Repo) Push(branch string, force bool) error {
 	return r.exec(args...)
 }
 
+// CheckoutSilent switches to a branch without printing output.
+func (r *Repo) CheckoutSilent(branch string, create bool) error {
+	args := []string{"checkout"}
+	if create {
+		args = append(args, "-b")
+	}
+	args = append(args, branch)
+	return r.execSilent(args...)
+}
+
+// PushSilent pushes a branch to origin without printing output.
+func (r *Repo) PushSilent(branch string, force bool) error {
+	args := []string{"push", "origin", branch}
+	if force {
+		args = []string{"push", "--force-with-lease", "origin", branch}
+	}
+	return r.execSilent(args...)
+}
+
 func (r *Repo) exec(args ...string) error {
 	cmd := exec.Command("git", args...)
 	cmd.Dir = r.path
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
+}
+
+func (r *Repo) execSilent(args ...string) error {
+	cmd := exec.Command("git", args...)
+	cmd.Dir = r.path
+	if out, err := cmd.CombinedOutput(); err != nil {
+		if ee, ok := err.(*exec.ExitError); ok {
+			return fmt.Errorf("%s: %s", ee, strings.TrimSpace(string(out)))
+		}
+		return err
+	}
+	return nil
 }
 
 func (r *Repo) execCapture(args ...string) (string, error) {

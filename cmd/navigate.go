@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/kerbaras/stacked/pkg/ui"
 	"github.com/spf13/cobra"
 )
 
@@ -55,7 +56,7 @@ func runUp(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("checkout %s: %w", target, err)
 	}
 
-	fmt.Printf("switched to %s\n", target)
+	ui.Successf("switched to %s", ui.BranchName(target))
 	return nil
 }
 
@@ -88,7 +89,7 @@ func runDown(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("checkout %s: %w", target, err)
 	}
 
-	fmt.Printf("switched to %s\n", target)
+	ui.Successf("switched to %s", ui.BranchName(target))
 	return nil
 }
 
@@ -122,7 +123,7 @@ func runGoto(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("checkout %s: %w", target, err)
 	}
 
-	fmt.Printf("switched to %s\n", target)
+	ui.Successf("switched to %s", ui.BranchName(target))
 	return nil
 }
 

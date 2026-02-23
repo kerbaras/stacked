@@ -27,7 +27,7 @@ func runList(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(store.State.Stacks) == 0 {
-		fmt.Println("no stacks. Run `stacked new` to create one.")
+		ui.Infof("no stacks — run %s to create one", ui.Bold.Render("`stacked new`"))
 		return nil
 	}
 

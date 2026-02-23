@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
+	"github.com/kerbaras/stacked/pkg/ui"
 	"github.com/spf13/cobra"
 )
 
@@ -36,7 +36,7 @@ func runContinue(cmd *cobra.Command, args []string) error {
 	}
 
 	// Continue the current rebase
-	fmt.Fprintln(os.Stderr, "continuing rebase...")
+	ui.Step("continuing rebase...")
 	if err := repo.RebaseContinue(); err != nil {
 		return fmt.Errorf("rebase --continue failed; resolve remaining conflicts, then run `stacked continue` again")
 	}
@@ -56,11 +56,11 @@ func runContinue(cmd *cobra.Command, args []string) error {
 	}
 
 	// No more branches — restore original branch
-	if err := repo.Checkout(state.OriginalBranch, false); err != nil {
-		fmt.Fprintf(os.Stderr, "warning: could not restore original branch %s: %v\n", state.OriginalBranch, err)
+	if err := repo.CheckoutSilent(state.OriginalBranch, false); err != nil {
+		ui.Warnf("could not restore original branch %s: %v", state.OriginalBranch, err)
 	}
 
-	fmt.Fprintln(os.Stderr, "rebase complete")
+	ui.Success("rebase complete")
 	return store.Save()
 }
 
@@ -82,11 +82,11 @@ func runAbort(cmd *cobra.Command, args []string) error {
 	removeRebaseState(repo.GitDir())
 
 	// Restore original branch
-	if err := repo.Checkout(state.OriginalBranch, false); err != nil {
-		fmt.Fprintf(os.Stderr, "warning: could not restore original branch %s: %v\n", state.OriginalBranch, err)
+	if err := repo.CheckoutSilent(state.OriginalBranch, false); err != nil {
+		ui.Warnf("could not restore original branch %s: %v", state.OriginalBranch, err)
 	}
 
-	fmt.Fprintln(os.Stderr, "rebase aborted")
+	ui.Success("rebase aborted")
 	return nil
 }
 

@@ -8,6 +8,7 @@ import (
 
 	"github.com/kerbaras/stacked/pkg/git"
 	"github.com/kerbaras/stacked/pkg/stack"
+	"github.com/kerbaras/stacked/pkg/ui"
 	"github.com/spf13/cobra"
 )
 
@@ -46,33 +47,45 @@ func runRebase(cmd *cobra.Command, args []string) error {
 }
 
 func cascadeRebase(repo *git.Repo, store *stack.Store, st *stack.Stack, stackName, originalBranch string, startIndex int) error {
+	var tasks []ui.Task
 	for i := startIndex; i < len(st.Branches); i++ {
-		br := st.Branches[i]
+		i, br := i, st.Branches[i]
 		parent := st.Parent(br.Name)
 		if parent == "" {
 			continue
 		}
 
-		fmt.Fprintf(os.Stderr, "rebasing %s onto %s...\n", br.Name, parent)
-		if err := repo.Rebase(parent, br.Name); err != nil {
-			state := RebaseState{
-				StackName:      stackName,
-				BranchIndex:    i,
-				OriginalBranch: originalBranch,
-			}
-			if saveErr := saveRebaseState(repo.GitDir(), state); saveErr != nil {
-				fmt.Fprintf(os.Stderr, "warning: failed to save rebase state: %v\n", saveErr)
-			}
-			return fmt.Errorf("rebase conflict on %s; resolve conflicts, then run `stacked continue`", br.Name)
+		tasks = append(tasks, ui.Task{
+			Label: fmt.Sprintf("Rebasing %s onto %s", ui.BranchName(br.Name), ui.BranchName(parent)),
+			Run: func() error {
+				if err := repo.RebaseSilent(parent, br.Name); err != nil {
+					state := RebaseState{
+						StackName:      stackName,
+						BranchIndex:    i,
+						OriginalBranch: originalBranch,
+					}
+					if saveErr := saveRebaseState(repo.GitDir(), state); saveErr != nil {
+						ui.Warnf("failed to save rebase state: %v", saveErr)
+					}
+					return fmt.Errorf("conflict on %s; resolve conflicts, then run `stacked continue`", br.Name)
+				}
+				return nil
+			},
+		})
+	}
+
+	if len(tasks) > 0 {
+		if err := ui.RunTasks(tasks); err != nil {
+			return err
 		}
 	}
 
 	// Restore original branch
-	if err := repo.Checkout(originalBranch, false); err != nil {
-		fmt.Fprintf(os.Stderr, "warning: could not restore original branch %s: %v\n", originalBranch, err)
+	if err := repo.CheckoutSilent(originalBranch, false); err != nil {
+		ui.Warnf("could not restore original branch %s: %v", originalBranch, err)
 	}
 
-	fmt.Fprintln(os.Stderr, "rebase complete")
+	ui.Success("rebase complete")
 	return store.Save()
 }
 

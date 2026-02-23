@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
+	"github.com/kerbaras/stacked/pkg/ui"
 	"github.com/spf13/cobra"
 )
 
@@ -31,14 +31,22 @@ func runPush(cmd *cobra.Command, args []string) error {
 
 	syncHint(repo, st)
 
+	var tasks []ui.Task
 	for _, br := range st.Branches {
-		fmt.Fprintf(os.Stderr, "pushing %s...\n", br.Name)
-		if err := repo.Push(br.Name, true); err != nil {
-			return fmt.Errorf("push %s: %w", br.Name, err)
-		}
+		br := br
+		tasks = append(tasks, ui.Task{
+			Label: fmt.Sprintf("Pushing %s", ui.BranchName(br.Name)),
+			Run: func() error {
+				return repo.PushSilent(br.Name, true)
+			},
+		})
 	}
 
-	fmt.Fprintln(os.Stderr, "all branches pushed")
+	if err := ui.RunTasks(tasks); err != nil {
+		return err
+	}
+
+	ui.Success("all branches pushed")
 	return nil
 }
 
