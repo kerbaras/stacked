@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 
@@ -41,15 +40,13 @@ func loadConfig() error {
 		_ = viper.MergeInConfig()
 	}
 
-	// 3. Explicit config file from --config flag
+	// 2. Explicit config file from --config flag
 	if cfgFile != "" {
 		viper.SetConfigFile(cfgFile)
-		if err := viper.MergeInConfig(); err != nil {
-			return fmt.Errorf("read config %s: %w", cfgFile, err)
-		}
+		_ = viper.MergeInConfig()
 	}
 
-	// 4. Environment variables with STACKED_ prefix
+	// 3. Environment variables with STACKED_ prefix
 	viper.SetEnvPrefix("STACKED")
 	viper.AutomaticEnv()
 	_ = viper.BindEnv("branch_template")
