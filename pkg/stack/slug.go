@@ -12,8 +12,8 @@ import (
 const maxSlugLen = 50
 
 var (
-	nonAlnum  = regexp.MustCompile(`[^a-z0-9]+`)
-	trimDash  = regexp.MustCompile(`^-+|-+$`)
+	nonAlnum = regexp.MustCompile(`[^a-z0-9]+`)
+	trimDash = regexp.MustCompile(`^-+|-+$`)
 )
 
 // Slugify converts a title into a URL/branch-safe slug.
@@ -48,8 +48,17 @@ func StackName(title string) string {
 	return Slugify(title)
 }
 
-// BranchName builds a branch name in the format stack/<stackName>/<nn>-<slug>.
-func BranchName(stackName string, index int, title string) string {
+var indexPattern = regexp.MustCompile(`%0?\d*d`)
+
+// BranchName builds a branch name from a template.
+// Supported placeholders: %name (stack name), %slug (slugified title),
+// and printf-style integer verbs like %02d (branch index).
+func BranchName(template, stackName string, index int, title string) string {
 	slug := Slugify(title)
-	return fmt.Sprintf("stack/%s/%02d-%s", stackName, index, slug)
+	s := strings.ReplaceAll(template, "%name", stackName)
+	s = strings.ReplaceAll(s, "%slug", slug)
+	s = indexPattern.ReplaceAllStringFunc(s, func(match string) string {
+		return fmt.Sprintf(match, index)
+	})
+	return s
 }

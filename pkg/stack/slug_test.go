@@ -43,8 +43,11 @@ func TestStackName(t *testing.T) {
 }
 
 func TestBranchName(t *testing.T) {
+	const defaultTpl = "stack/%name/%02d-%slug"
+
 	tests := []struct {
 		name      string
+		template  string
 		stackName string
 		index     int
 		title     string
@@ -52,19 +55,39 @@ func TestBranchName(t *testing.T) {
 	}{
 		{
 			"first branch",
+			defaultTpl,
 			"feat-svc-add-user-auth", 1, "add user auth",
 			"stack/feat-svc-add-user-auth/01-add-user-auth",
 		},
 		{
 			"tenth branch",
+			defaultTpl,
 			"feat-svc-add-user-auth", 10, "final cleanup",
 			"stack/feat-svc-add-user-auth/10-final-cleanup",
+		},
+		{
+			"custom template",
+			"refs/%name/%03d/%slug",
+			"my-stack", 3, "add auth",
+			"refs/my-stack/003/add-auth",
+		},
+		{
+			"no index",
+			"branch/%name/%slug",
+			"my-stack", 5, "setup",
+			"branch/my-stack/setup",
+		},
+		{
+			"plain index",
+			"stack/%name/%d-%slug",
+			"my-stack", 7, "cleanup",
+			"stack/my-stack/7-cleanup",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := BranchName(tt.stackName, tt.index, tt.title)
+			got := BranchName(tt.template, tt.stackName, tt.index, tt.title)
 			if got != tt.want {
 				t.Errorf("BranchName() = %q, want %q", got, tt.want)
 			}

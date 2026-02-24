@@ -36,7 +36,7 @@ func runNew(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("stack %q already exists", stackName)
 	}
 
-	branchName := stack.BranchName(stackName, 1, title)
+	branchName := stack.BranchName(cfg.BranchTemplate, stackName, 1, title)
 
 	// Ensure we're on the base branch before creating the new branch
 	if err := repo.Checkout(fromFlag, false); err != nil {
