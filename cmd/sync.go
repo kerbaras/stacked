@@ -49,7 +49,7 @@ func runSync(cmd *cobra.Command, args []string) error {
 	owner, repoName, remoteErr := repo.RemoteOwnerRepo()
 	var client gh.Client
 	if remoteErr == nil {
-		client, _ = gh.NewClientForRepo(owner, repoName)
+		client, _ = gh.NewClientForRepo(owner, repoName, cfg.GitHubToken)
 	}
 
 	// Step 3: Prune merged branches from the bottom

@@ -37,7 +37,7 @@ func runReview(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	client, err := gh.NewClientForRepo(owner, repoName)
+	client, err := gh.NewClientForRepo(owner, repoName, cfg.GitHubToken)
 	if err != nil {
 		return err
 	}
