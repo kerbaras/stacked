@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/kerbaras/stacked/pkg/ui"
 	"github.com/spf13/cobra"
 )
 
@@ -22,16 +23,16 @@ func runInit(cmd *cobra.Command, args []string) error {
 
 	if hooksFlag {
 		if repo.HasHooks() {
-			fmt.Println("hooks already installed")
+			ui.Info("hooks already installed")
 			return nil
 		}
 		if err := repo.InstallHooks(); err != nil {
 			return fmt.Errorf("install hooks: %w", err)
 		}
-		fmt.Println("git hooks installed")
+		ui.Success("git hooks installed")
 	}
 
-	fmt.Println("stacked initialized")
+	ui.Success("stacked initialized")
 	return nil
 }
 

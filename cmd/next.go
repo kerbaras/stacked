@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/kerbaras/stacked/pkg/stack"
+	"github.com/kerbaras/stacked/pkg/ui"
 	"github.com/spf13/cobra"
 )
 
@@ -60,7 +61,7 @@ func runNext(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	fmt.Printf("created branch %s (#%d in stack)\n", branchName, index)
+	ui.Successf("created branch %s %s", ui.BranchName(branchName), ui.Faint(fmt.Sprintf("(#%d in stack)", index)))
 	return nil
 }
 
